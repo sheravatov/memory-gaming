@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Memory Sphere: Pro Evolution</title>
+    <title>Memory Sphere: Collision Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,7 +11,7 @@
             --success: #10b981; --error: #f43f5e; --glass: rgba(255, 255, 255, 0.03);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Plus Jakarta Sans', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Plus Jakarta Sans', sans-serif; touch-action: none; }
 
         body {
             background: var(--bg); color: white; height: 100vh; overflow: hidden;
@@ -19,7 +19,7 @@
             background-image: radial-gradient(circle at 50% 50%, #0f172a 0%, #030712 100%);
         }
 
-        /* HUD Paneli */
+        /* HUD */
         .hud {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 25px; background: var(--glass); backdrop-filter: blur(25px);
@@ -30,27 +30,25 @@
         .label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; }
         .value { font-size: 1.2rem; font-weight: 800; color: var(--primary); display: block; }
 
-        /* O'yin Maydoni */
         #game-area { flex-grow: 1; position: relative; overflow: hidden; }
 
         .sphere {
-            position: absolute; width: 62px; height: 62px;
+            position: absolute; width: 60px; height: 60px;
             background: rgba(255, 255, 255, 0.05); border: 2px solid var(--primary);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 1.5rem; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
-            transition: transform 0.2s, opacity 0.3s; z-index: 10;
+            font-weight: 800; font-size: 1.4rem; cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+            z-index: 10; will-change: transform, left, top;
         }
 
-        .sphere.hidden { background: var(--primary); color: transparent; box-shadow: 0 0 30px var(--primary); }
+        .sphere.hidden { background: var(--primary); color: transparent; box-shadow: 0 0 25px var(--primary); }
         .sphere.matched { transform: scale(0); opacity: 0; pointer-events: none; }
         .sphere.error { animation: shake 0.4s; background: var(--error); border-color: white; }
 
-        /* Taymer */
         #timer-wrap { width: 100%; height: 3px; background: rgba(255,255,255,0.05); }
         #timer-fill { width: 100%; height: 100%; background: var(--primary); transition: width 0.1s linear; }
 
-        /* Menyular */
+        /* Overlays */
         .overlay {
             position: fixed; inset: 0; background: rgba(3, 7, 18, 0.98);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -61,12 +59,9 @@
         .menu-card { 
             background: var(--glass); border: 1px solid rgba(255,255,255,0.1); 
             padding: 30px; border-radius: 35px; width: 100%; max-width: 400px;
-            backdrop-filter: blur(10px);
         }
 
-        h1 { font-size: 2rem; font-weight: 800; margin-bottom: 20px; letter-spacing: -1px; }
-
-        .selection-title { font-size: 0.8rem; margin: 15px 0 10px; opacity: 0.6; text-transform: uppercase; }
+        h1 { font-size: 2rem; font-weight: 800; margin-bottom: 20px; }
 
         .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .choice-btn {
@@ -81,7 +76,6 @@
             padding: 18px; border-radius: 18px; font-size: 1.1rem; font-weight: 800;
             cursor: pointer; transition: 0.3s;
         }
-        .start-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4); }
 
         #popup-msg {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
@@ -98,18 +92,9 @@
 <body>
 
     <header class="hud">
-        <div class="hud-item">
-            <span class="label">Level</span>
-            <span id="lvl-val" class="value">1</span>
-        </div>
-        <div class="hud-item">
-            <span class="label">Hayotlar</span>
-            <span id="lives-val" class="value" style="color:var(--error)">❤❤❤</span>
-        </div>
-        <div class="hud-item">
-            <span class="label">Ochko</span>
-            <span id="scr-val" class="value">0</span>
-        </div>
+        <div class="hud-item"><span class="label">Level</span><span id="lvl-val" class="value">1</span></div>
+        <div class="hud-item"><span class="label">Hayotlar</span><span id="lives-val" class="value" style="color:var(--error)">❤❤❤</span></div>
+        <div class="hud-item"><span class="label">Ochko</span><span id="scr-val" class="value">0</span></div>
     </header>
 
     <div id="timer-wrap"><div id="timer-fill"></div></div>
@@ -118,79 +103,56 @@
         <div id="popup-msg">LEVEL 1</div>
     </main>
 
-    <!-- Start Overlay -->
     <div id="start-screen" class="overlay">
         <div class="menu-card">
-            <h1>SPHERE MEMORY</h1>
-            
-            <p class="selection-title">O'yin Rejimi</p>
+            <h1>SPHERE ELITE</h1>
             <div class="btn-group">
-                <button class="choice-btn selected" data-type="style" data-val="static">STATIK<br><small>Qimirlamaydi</small></button>
-                <button class="choice-btn" data-type="style" data-val="chaotic">XAOS<br><small>Harakatlanadi</small></button>
+                <button class="choice-btn selected" data-type="style" data-val="static">STATIK</button>
+                <button class="choice-btn" data-type="style" data-val="chaotic">XAOS</button>
             </div>
-
-            <p class="selection-title">Qiyinchilik</p>
             <div class="btn-group">
                 <button class="choice-btn" data-type="diff" data-val="easy">OSON</button>
                 <button class="choice-btn selected" data-type="diff" data-val="medium">O'RTA</button>
                 <button class="choice-btn" data-type="diff" data-val="hard">QIYIN</button>
             </div>
-
             <button class="start-btn" onclick="Game.boot()">O'YINNI BOSHLASH</button>
         </div>
     </div>
 
-    <!-- Result Overlay -->
     <div id="over-screen" class="overlay hide">
-        <h1 style="color: var(--error);">SINOV YAKUNLANDI</h1>
-        <div id="final-stats" style="margin-bottom: 30px; opacity: 0.8;"></div>
-        <button class="start-btn" onclick="location.reload()">BOSHGA QAYTISH</button>
+        <h1 style="color: var(--error);">TUGADI</h1>
+        <div id="final-stats" style="margin-bottom: 30px;"></div>
+        <button class="start-btn" onclick="location.reload()">QAYTA</button>
     </div>
 
     <script>
-        /**
-         * AUDIO ENGINE
-         */
         const SFX = {
             ctx: null,
             init() { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-            play(f, d = 0.4) {
+            play(f) {
                 if(!this.ctx) return;
                 const o = this.ctx.createOscillator();
                 const g = this.ctx.createGain();
-                o.type = 'sine'; o.frequency.value = f;
+                o.frequency.value = f;
                 g.gain.setValueAtTime(0.05, this.ctx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + d);
+                g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.3);
                 o.connect(g); g.connect(this.ctx.destination);
-                o.start(); o.stop(this.ctx.currentTime + d);
+                o.start(); o.stop(this.ctx.currentTime + 0.3);
             }
         };
 
-        /**
-         * GAME ENGINE
-         */
         const Game = {
             level: 1, score: 0, lives: 3,
             moveStyle: 'static', difficulty: 'medium',
             nodes: [], step: 1, phase: 'SHOW',
-            timer: null, timeLeft: 100,
+            timer: null, timeLeft: 100, radius: 30, // 60px / 2
 
             boot() {
                 SFX.init();
                 document.getElementById('start-screen').classList.add('hide');
-                this.setupParams();
+                this.lives = {easy:5, medium:3, hard:1}[this.difficulty];
                 this.startLevel();
-                this.physicsLoop();
-            },
-
-            setupParams() {
-                const diffs = {
-                    easy: { lives: 5, speed: 0.1 },
-                    medium: { lives: 3, speed: 0.2 },
-                    hard: { lives: 1, speed: 0.4 }
-                };
-                this.lives = diffs[this.difficulty].lives;
-                this.config = diffs[this.difficulty];
+                this.engineLoop();
             },
 
             startLevel() {
@@ -204,21 +166,38 @@
 
             createNodes(n) {
                 const area = document.getElementById('game-area');
+                const rect = area.getBoundingClientRect();
                 area.querySelectorAll('.sphere').forEach(s => s.remove());
                 this.nodes = [];
 
                 for(let i=1; i<=n; i++) {
+                    let x, y, overlap;
+                    let attempts = 0;
+
+                    // To'qnashuvsiz joy topish (Spawning)
+                    do {
+                        overlap = false;
+                        x = 5 + Math.random() * 90; // % dagi x
+                        y = 10 + Math.random() * 80; // % dagi y
+                        
+                        // Avvalgi sharlar bilan masofani tekshirish
+                        for(let node of this.nodes) {
+                            const dx = (node.x - x) * rect.width / 100;
+                            const dy = (node.y - y) * rect.height / 100;
+                            const dist = Math.sqrt(dx*dx + dy*dy);
+                            if(dist < 70) { overlap = true; break; } // 60px shar + 10px bo'shliq
+                        }
+                        attempts++;
+                    } while(overlap && attempts < 100);
+
                     const el = document.createElement('div');
                     el.className = 'sphere'; el.textContent = i;
                     
-                    const drift = this.moveStyle === 'chaotic' ? (0.05 + this.level * 0.01) : 0;
-                    
+                    const speed = this.moveStyle === 'chaotic' ? (0.05 + this.level * 0.01) : 0;
                     const data = {
-                        el, i,
-                        x: 10 + Math.random() * 80,
-                        y: 15 + Math.random() * 75,
-                        vx: (Math.random() - 0.5) * drift,
-                        vy: (Math.random() - 0.5) * drift
+                        el, i, x, y,
+                        vx: (Math.random() - 0.5) * speed,
+                        vy: (Math.random() - 0.5) * speed
                     };
 
                     el.onclick = () => this.handleTap(data);
@@ -245,18 +224,17 @@
 
             switchPhase() {
                 this.phase = 'HIDDEN'; this.step = 1;
-                this.notify("ESLAB QOLING!");
-                SFX.play(250, 0.8);
-                
+                this.notify("ESLAB QOLING");
                 this.nodes.forEach(n => {
                     n.el.classList.remove('matched');
                     n.el.classList.add('hidden');
                 });
 
                 this.timeLeft = 100;
+                const speed = {easy:0.1, medium:0.2, hard:0.4}[this.difficulty];
                 clearInterval(this.timer);
                 this.timer = setInterval(() => {
-                    this.timeLeft -= (this.config.speed + (this.level * 0.01));
+                    this.timeLeft -= (speed + (this.level * 0.01));
                     document.getElementById('timer-fill').style.width = this.timeLeft + '%';
                     if(this.timeLeft <= 0) { clearInterval(this.timer); this.fail(); }
                 }, 100);
@@ -270,20 +248,15 @@
 
             fail(node) {
                 clearInterval(this.timer);
-                SFX.play(120, 0.5);
+                SFX.play(150);
                 if(node) node.el.classList.add('error');
                 this.lives--;
                 if(this.lives <= 0) this.gameOver();
-                else {
-                    this.notify("XATO!");
-                    setTimeout(() => this.startLevel(), 1000);
-                }
+                else setTimeout(() => this.startLevel(), 1000);
             },
 
             gameOver() {
-                const info = document.getElementById('final-stats');
-                const iq = 80 + (this.level * 5);
-                info.innerHTML = `Rejim: ${this.moveStyle.toUpperCase()}<br>Level: ${this.level}<br>Ochko: ${this.score}<br><br><b>Xotira koeffitsiyenti: ${iq}</b>`;
+                document.getElementById('final-stats').innerHTML = `Level: ${this.level}<br>Ochko: ${this.score}`;
                 document.getElementById('over-screen').classList.remove('hide');
             },
 
@@ -299,25 +272,64 @@
                 setTimeout(() => m.style.opacity = 0, 1500);
             },
 
-            physicsLoop() {
+            engineLoop() {
+                const area = document.getElementById('game-area');
+                const rect = area.getBoundingClientRect();
+
+                // 1. Harakat va Devordan qaytish
                 this.nodes.forEach(n => {
                     if(n.el.classList.contains('matched')) return;
                     n.x += n.vx; n.y += n.vy;
-                    if(n.x < 5 || n.x > 90) n.vx *= -1;
-                    if(n.y < 5 || n.y > 90) n.vy *= -1;
-                    n.el.style.left = n.x + '%'; n.el.style.top = n.y + '%';
+                    if(n.x < 3 || n.x > 93) n.vx *= -1;
+                    if(n.y < 3 || n.y > 93) n.vy *= -1;
                 });
-                requestAnimationFrame(() => this.physicsLoop());
+
+                // 2. Bir-biri bilan to'qnashuv (Collision Resolution)
+                for(let i = 0; i < this.nodes.length; i++) {
+                    for(let j = i + 1; j < this.nodes.length; j++) {
+                        const a = this.nodes[i];
+                        const b = this.nodes[j];
+                        if(a.el.classList.contains('matched') || b.el.classList.contains('matched')) continue;
+
+                        const dx = (b.x - a.x) * rect.width / 100;
+                        const dy = (b.y - a.y) * rect.height / 100;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+
+                        if(dist < 60) { // To'qnashuv sodir bo'ldi
+                            // Yo'nalishlarni almashtirish (Simple Bounce)
+                            const tempVx = a.vx;
+                            const tempVy = a.vy;
+                            a.vx = b.vx; a.vy = b.vy;
+                            b.vx = tempVx; b.vy = tempVy;
+
+                            // Bir-birini ichiga kirib qolmasligi uchun "push back"
+                            const overlap = 60 - dist;
+                            const nx = dx / dist;
+                            const ny = dy / dist;
+                            a.x -= (nx * overlap / rect.width * 50);
+                            a.y -= (ny * overlap / rect.height * 50);
+                            b.x += (nx * overlap / rect.width * 50);
+                            b.y += (ny * overlap / rect.height * 50);
+                        }
+                    }
+                }
+
+                // 3. UI yangilash
+                this.nodes.forEach(n => {
+                    n.el.style.left = n.x + '%';
+                    n.el.style.top = n.y + '%';
+                });
+
+                requestAnimationFrame(() => this.engineLoop());
             }
         };
 
-        // Tugmalar uchun eventlar
+        // UI tugmalari uchun eventlar
         document.querySelectorAll('.choice-btn').forEach(btn => {
             btn.onclick = () => {
                 const type = btn.dataset.type;
                 document.querySelectorAll(`.choice-btn[data-type="${type}"]`).forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
-                
                 if(type === 'style') Game.moveStyle = btn.dataset.val;
                 if(type === 'diff') Game.difficulty = btn.dataset.val;
             }
