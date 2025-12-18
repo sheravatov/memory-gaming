@@ -2,84 +2,93 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Memory Sphere: Collision Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Memory Sphere Pro: Mobile Elite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #00ffcc; --secondary: #00d4ff; --bg: #030712;
-            --success: #10b981; --error: #f43f5e; --glass: rgba(255, 255, 255, 0.03);
+            --success: #10b981; --error: #f43f5e; --glass: rgba(255, 255, 255, 0.05);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Plus Jakarta Sans', sans-serif; touch-action: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background: var(--bg); color: white; height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column;
+            background: var(--bg); color: white;
+            /* iPhone Safari balandlik muammosini hal qilish */
+            height: 100vh; height: 100dvh; 
+            overflow: hidden; display: flex; flex-direction: column;
             background-image: radial-gradient(circle at 50% 50%, #0f172a 0%, #030712 100%);
         }
 
-        /* HUD */
+        /* HUD: Yuqori qism */
         .hud {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 25px; background: var(--glass); backdrop-filter: blur(25px);
-            border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100;
+            padding: env(safe-area-inset-top, 20px) 25px 15px;
+            background: var(--glass); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 500;
         }
 
         .hud-item { text-align: center; }
         .label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; }
-        .value { font-size: 1.2rem; font-weight: 800; color: var(--primary); display: block; }
+        .value { font-size: 1.1rem; font-weight: 800; color: var(--primary); display: block; }
 
-        #game-area { flex-grow: 1; position: relative; overflow: hidden; }
+        /* O'yin maydoni */
+        #game-area { 
+            flex-grow: 1; position: relative; overflow: hidden; width: 100%;
+            /* Pastki tugmalar va Safe Area uchun bo'shliq */
+            padding-bottom: env(safe-area-inset-bottom, 30px);
+        }
 
         .sphere {
-            position: absolute; width: 60px; height: 60px;
-            background: rgba(255, 255, 255, 0.05); border: 2px solid var(--primary);
+            position: absolute; width: 64px; height: 64px;
+            background: rgba(15, 23, 42, 0.6); border: 2.5px solid var(--primary);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 1.4rem; cursor: pointer;
+            font-weight: 800; font-size: 1.5rem; cursor: pointer;
             box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
-            z-index: 10; will-change: transform, left, top;
+            z-index: 10; touch-action: none;
+            will-change: transform;
         }
 
         .sphere.hidden { background: var(--primary); color: transparent; box-shadow: 0 0 25px var(--primary); }
         .sphere.matched { transform: scale(0); opacity: 0; pointer-events: none; }
         .sphere.error { animation: shake 0.4s; background: var(--error); border-color: white; }
 
-        #timer-wrap { width: 100%; height: 3px; background: rgba(255,255,255,0.05); }
+        #timer-wrap { width: 100%; height: 4px; background: rgba(255,255,255,0.05); }
         #timer-fill { width: 100%; height: 100%; background: var(--primary); transition: width 0.1s linear; }
 
-        /* Overlays */
+        /* Menyular */
         .overlay {
             position: fixed; inset: 0; background: rgba(3, 7, 18, 0.98);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 2000; text-align: center; padding: 20px;
+            z-index: 2000; text-align: center; padding: 20px; padding-bottom: env(safe-area-inset-bottom);
         }
         .hide { display: none !important; }
 
         .menu-card { 
             background: var(--glass); border: 1px solid rgba(255,255,255,0.1); 
-            padding: 30px; border-radius: 35px; width: 100%; max-width: 400px;
+            padding: 30px; border-radius: 40px; width: 100%; max-width: 380px;
         }
 
-        h1 { font-size: 2rem; font-weight: 800; margin-bottom: 20px; }
+        h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 25px; }
 
         .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .choice-btn {
             flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            color: white; padding: 12px; border-radius: 15px; cursor: pointer;
-            font-weight: 600; transition: 0.3s; font-size: 0.85rem;
+            color: white; padding: 15px 10px; border-radius: 20px; cursor: pointer;
+            font-weight: 600; transition: 0.3s; font-size: 0.8rem;
         }
         .choice-btn.selected { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); color: var(--primary); }
 
         .start-btn {
             background: var(--primary); color: var(--bg); border: none; width: 100%;
-            padding: 18px; border-radius: 18px; font-size: 1.1rem; font-weight: 800;
+            padding: 20px; border-radius: 25px; font-size: 1.2rem; font-weight: 800;
             cursor: pointer; transition: 0.3s;
         }
 
         #popup-msg {
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 3rem; font-weight: 800; opacity: 0; pointer-events: none; transition: 0.5s;
+            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 2.5rem; font-weight: 800; opacity: 0; pointer-events: none; transition: 0.5s; z-index: 1000;
         }
 
         @keyframes shake {
@@ -92,9 +101,9 @@
 <body>
 
     <header class="hud">
-        <div class="hud-item"><span class="label">Level</span><span id="lvl-val" class="value">1</span></div>
-        <div class="hud-item"><span class="label">Hayotlar</span><span id="lives-val" class="value" style="color:var(--error)">❤❤❤</span></div>
-        <div class="hud-item"><span class="label">Ochko</span><span id="scr-val" class="value">0</span></div>
+        <div class="hud-item"><span class="label">Lv</span><span id="lvl-val" class="value">1</span></div>
+        <div class="hud-item"><span class="label">Lives</span><span id="lives-val" class="value" style="color:var(--error)">❤❤❤</span></div>
+        <div class="hud-item"><span class="label">Score</span><span id="scr-val" class="value">0</span></div>
     </header>
 
     <div id="timer-wrap"><div id="timer-fill"></div></div>
@@ -103,9 +112,10 @@
         <div id="popup-msg">LEVEL 1</div>
     </main>
 
+    <!-- Start Overlay -->
     <div id="start-screen" class="overlay">
         <div class="menu-card">
-            <h1>SPHERE ELITE</h1>
+            <h1>MEMORY ELITE</h1>
             <div class="btn-group">
                 <button class="choice-btn selected" data-type="style" data-val="static">STATIK</button>
                 <button class="choice-btn" data-type="style" data-val="chaotic">XAOS</button>
@@ -119,22 +129,25 @@
         </div>
     </div>
 
+    <!-- Result Overlay -->
     <div id="over-screen" class="overlay hide">
         <h1 style="color: var(--error);">TUGADI</h1>
-        <div id="final-stats" style="margin-bottom: 30px;"></div>
+        <div id="final-stats" style="margin-bottom: 30px; line-height: 1.6;"></div>
         <button class="start-btn" onclick="location.reload()">QAYTA</button>
     </div>
 
     <script>
         const SFX = {
             ctx: null,
-            init() { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            init() { 
+                if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+            },
             play(f) {
                 if(!this.ctx) return;
                 const o = this.ctx.createOscillator();
                 const g = this.ctx.createGain();
                 o.frequency.value = f;
-                g.gain.setValueAtTime(0.05, this.ctx.currentTime);
+                g.gain.setValueAtTime(0.04, this.ctx.currentTime);
                 g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.3);
                 o.connect(g); g.connect(this.ctx.destination);
                 o.start(); o.stop(this.ctx.currentTime + 0.3);
@@ -145,62 +158,63 @@
             level: 1, score: 0, lives: 3,
             moveStyle: 'static', difficulty: 'medium',
             nodes: [], step: 1, phase: 'SHOW',
-            timer: null, timeLeft: 100, radius: 30, // 60px / 2
+            timer: null, timeLeft: 100,
+            radius: 32, // Sphere width 64 / 2
 
             boot() {
                 SFX.init();
                 document.getElementById('start-screen').classList.add('hide');
                 this.lives = {easy:5, medium:3, hard:1}[this.difficulty];
                 this.startLevel();
-                this.engineLoop();
+                this.engine();
             },
 
             startLevel() {
                 this.step = 1; this.phase = 'SHOW';
                 const count = 2 + Math.floor(this.level / 1.5);
-                this.createNodes(Math.min(count, 15));
+                this.spawnNodes(Math.min(count, 15));
                 this.updateUI();
                 this.notify(`LEVEL ${this.level}`);
                 document.getElementById('timer-fill').style.width = '100%';
             },
 
-            createNodes(n) {
+            spawnNodes(n) {
                 const area = document.getElementById('game-area');
                 const rect = area.getBoundingClientRect();
                 area.querySelectorAll('.sphere').forEach(s => s.remove());
                 this.nodes = [];
 
                 for(let i=1; i<=n; i++) {
-                    let x, y, overlap;
+                    let px, py, overlap;
                     let attempts = 0;
 
-                    // To'qnashuvsiz joy topish (Spawning)
+                    // Mukammal joylashuv qidirish (Collision-free spawn)
                     do {
                         overlap = false;
-                        x = 5 + Math.random() * 90; // % dagi x
-                        y = 10 + Math.random() * 80; // % dagi y
+                        // iPhone'da pastdagi HUD'ga tushmasligi uchun chegaralar: 5% dan 82% gacha
+                        px = 10 + Math.random() * 80;
+                        py = 5 + Math.random() * 77;
                         
-                        // Avvalgi sharlar bilan masofani tekshirish
                         for(let node of this.nodes) {
-                            const dx = (node.x - x) * rect.width / 100;
-                            const dy = (node.y - y) * rect.height / 100;
+                            const dx = (node.px - px) * rect.width / 100;
+                            const dy = (node.py - py) * rect.height / 100;
                             const dist = Math.sqrt(dx*dx + dy*dy);
-                            if(dist < 70) { overlap = true; break; } // 60px shar + 10px bo'shliq
+                            if(dist < 75) { overlap = true; break; } 
                         }
                         attempts++;
-                    } while(overlap && attempts < 100);
+                    } while(overlap && attempts < 200);
 
                     const el = document.createElement('div');
                     el.className = 'sphere'; el.textContent = i;
                     
-                    const speed = this.moveStyle === 'chaotic' ? (0.05 + this.level * 0.01) : 0;
+                    const speed = this.moveStyle === 'chaotic' ? (0.06 + this.level * 0.012) : 0;
                     const data = {
-                        el, i, x, y,
+                        el, i, px, py,
                         vx: (Math.random() - 0.5) * speed,
                         vy: (Math.random() - 0.5) * speed
                     };
 
-                    el.onclick = () => this.handleTap(data);
+                    el.onclick = (e) => { e.preventDefault(); this.handleTap(data); };
                     area.appendChild(el);
                     this.nodes.push(data);
                 }
@@ -214,7 +228,7 @@
                     this.score += 10 * this.level;
                     if(this.step > this.nodes.length) {
                         if(this.phase === 'SHOW') setTimeout(() => this.switchPhase(), 600);
-                        else setTimeout(() => this.winLevel(), 600);
+                        else setTimeout(() => this.win(), 600);
                     }
                 } else {
                     this.fail(node);
@@ -240,7 +254,7 @@
                 }, 100);
             },
 
-            winLevel() {
+            win() {
                 clearInterval(this.timer);
                 this.level++; this.score += 100;
                 this.startLevel();
@@ -256,7 +270,7 @@
             },
 
             gameOver() {
-                document.getElementById('final-stats').innerHTML = `Level: ${this.level}<br>Ochko: ${this.score}`;
+                document.getElementById('final-stats').innerHTML = `LEVEL: ${this.level}<br>SCORE: ${this.score}`;
                 document.getElementById('over-screen').classList.remove('hide');
             },
 
@@ -272,59 +286,64 @@
                 setTimeout(() => m.style.opacity = 0, 1500);
             },
 
-            engineLoop() {
+            engine() {
                 const area = document.getElementById('game-area');
                 const rect = area.getBoundingClientRect();
+                const diam = 66; // 64px + 2px buffer
 
                 // 1. Harakat va Devordan qaytish
                 this.nodes.forEach(n => {
                     if(n.el.classList.contains('matched')) return;
-                    n.x += n.vx; n.y += n.vy;
-                    if(n.x < 3 || n.x > 93) n.vx *= -1;
-                    if(n.y < 3 || n.y > 93) n.vy *= -1;
+                    n.px += n.vx; n.py += n.vy;
+                    // Chegaralar: X (2-94%), Y (2-85%) iPhone pastki qismi uchun
+                    if(n.px < 4 || n.px > 90) n.vx *= -1;
+                    if(n.py < 3 || n.py > 82) n.vy *= -1;
                 });
 
-                // 2. Bir-biri bilan to'qnashuv (Collision Resolution)
+                // 2. Bir-biri bilan haqiqiy to'qnashuv fizikasi
                 for(let i = 0; i < this.nodes.length; i++) {
                     for(let j = i + 1; j < this.nodes.length; j++) {
                         const a = this.nodes[i];
                         const b = this.nodes[j];
                         if(a.el.classList.contains('matched') || b.el.classList.contains('matched')) continue;
 
-                        const dx = (b.x - a.x) * rect.width / 100;
-                        const dy = (b.y - a.y) * rect.height / 100;
+                        const dx = (b.px - a.px) * rect.width / 100;
+                        const dy = (b.py - a.py) * rect.height / 100;
                         const dist = Math.sqrt(dx*dx + dy*dy);
 
-                        if(dist < 60) { // To'qnashuv sodir bo'ldi
-                            // Yo'nalishlarni almashtirish (Simple Bounce)
-                            const tempVx = a.vx;
-                            const tempVy = a.vy;
-                            a.vx = b.vx; a.vy = b.vy;
-                            b.vx = tempVx; b.vy = tempVy;
-
-                            // Bir-birini ichiga kirib qolmasligi uchun "push back"
-                            const overlap = 60 - dist;
+                        if(dist < diam) {
+                            // To'qnashuv normali
                             const nx = dx / dist;
                             const ny = dy / dist;
-                            a.x -= (nx * overlap / rect.width * 50);
-                            a.y -= (ny * overlap / rect.height * 50);
-                            b.x += (nx * overlap / rect.width * 50);
-                            b.y += (ny * overlap / rect.height * 50);
+
+                            // Bir-birini ichidan itarib chiqarish (Separation)
+                            const overlap = diam - dist;
+                            const ox = nx * overlap / rect.width * 50;
+                            const oy = ny * overlap / rect.height * 50;
+                            a.px -= ox; a.py -= oy;
+                            b.px += ox; b.py += oy;
+
+                            // Tezlikni qaytarish (Reflection)
+                            const dot = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+                            if(dot > 0) {
+                                a.vx -= dot * nx; a.vy -= dot * ny;
+                                b.vx += dot * nx; b.vy += dot * ny;
+                            }
                         }
                     }
                 }
 
-                // 3. UI yangilash
+                // 3. Render
                 this.nodes.forEach(n => {
-                    n.el.style.left = n.x + '%';
-                    n.el.style.top = n.y + '%';
+                    n.el.style.left = n.px + '%';
+                    n.el.style.top = n.py + '%';
                 });
 
-                requestAnimationFrame(() => this.engineLoop());
+                requestAnimationFrame(() => this.engine());
             }
         };
 
-        // UI tugmalari uchun eventlar
+        // UI Listeners
         document.querySelectorAll('.choice-btn').forEach(btn => {
             btn.onclick = () => {
                 const type = btn.dataset.type;
